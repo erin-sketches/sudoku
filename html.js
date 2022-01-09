@@ -4,14 +4,24 @@ import { calc_sum_digits } from "./sums.js"
 function get(id) {
     return document.getElementById(id);
 }
+function int(v) {
+    return parseInt(v);
+}
 // lazy lazy
 function val(id) {
     const n = get(id);
     const v = n.nodeValue ? n.nodeValue : n.value;
-    if(Number.isInteger(v)) {
-        return Number.parseInt(v);
+    return int(v);
+}
+// lazy, lazy
+function list(id) {
+    const n = get(id);
+    const vals = n.nodeValue ? n.nodeValue : n.value;
+    if(!vals) return [];
+    if(!vals.includes(',')) {
+        return [int(vals)];
     }
-    return v;
+    return vals.split(',').map(int);
 }
 function br(node) {
     node.appendChild(document.createElement("br"));
@@ -26,11 +36,25 @@ function clear(id) {
         node.removeChild(node.firstChild);
 }
 
-function render_sum(total, N, list_o_combos) {
+// rendering stuffs below this line //
+
+function render_sum(total,N,banned,must_use,max_digit,list_o_combos) {
     clear("sum_results");
     const cont = get("sum_results");
     txt(cont,`Total: ${total} / N: ${N}`);
     br(cont);
+    if(banned?.length) {
+        txt(cont, `- Banned: ${banned.join(', ')}`);
+        br(cont);
+    }
+    if(must_use?.length) {
+        txt(cont, `- Must use: ${must_use.join(', ')}`);
+        br(cont);
+    }
+    if(max_digit && max_digit != 9) {
+        txt(cont, `- Max digit: ${max_digit}`);
+        br(cont);
+    }
     if(list_o_combos.length == 0) {
         txt(cont,"no results") ;
         return;
@@ -44,8 +68,11 @@ function render_sum(total, N, list_o_combos) {
 function calc_sum() {
     const total = val("sum_total");
     const N = val("sum_N");
-    const results = calc_sum_digits(total, N);
-    render_sum(total,N,results);
+    const banned = list("sum_banned");
+    const must_use = list("sum_must_include");
+    const max_digit = val("sum_max_digit");
+    const results = calc_sum_digits(total, N, must_use, banned, max_digit);
+    render_sum(total,N,banned,must_use,max_digit,results);
 }
 
 function register_handlers() {
