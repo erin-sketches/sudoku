@@ -84,7 +84,7 @@ function register_handlers() {
     const focus_els = get_focusable_els();
     document.addEventListener("keydown", (e) => {
         const focused = document.activeElement;
-        if(e.code != "Enter") {
+        if(e.key != "Enter") {
             return;
         }
         e.preventDefault();
