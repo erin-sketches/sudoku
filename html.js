@@ -99,8 +99,13 @@ function register_handlers() {
                 break;
             }
         }
-        if(idx_next == null) return;
-        focus_els[idx_next]?.focus();
+        if(idx_next == null || !focus_els[idx_next]) return;
+        const nxt = focus_els[idx_next];
+        nxt.focus();
+        if(nxt.tagName == "BUTTON") {
+            nxt.click();
+            return;
+        }
     });
 }
 
