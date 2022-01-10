@@ -23,6 +23,9 @@ function list(id) {
     }
     return vals.split(',').map(int);
 }
+function bool(id) {
+    return get(id)?.checked;
+}
 function br(node) {
     node.appendChild(document.createElement("br"));
 }
@@ -36,16 +39,16 @@ function clear(id) {
         node.removeChild(node.firstChild);
 }
 
-function get_focusable_els() {
-    return get("sum_cont").querySelectorAll(["input","button"]);
-}
-
 // rendering stuffs below this line //
 
-function render_sum(total,N,banned,must_use,max_digit,list_o_combos) {
+function render_sum(total,N,banned,must_use,max_digit,allow_repeats,list_o_combos) {
     clear("sum_results");
     const cont = get("sum_results");
-    txt(cont,`Total: ${total} / N: ${N}`);
+    if(!total || !N) {
+        txt(cont, "--");
+        return;
+    }
+    txt(cont,`Total: ${total} / N: ${N} / Repeats: ${allow_repeats ? "✅" : "❌"}`);
     br(cont);
     if(banned?.length) {
         txt(cont, `- Banned: ${banned.join(', ')}`);
@@ -63,6 +66,8 @@ function render_sum(total,N,banned,must_use,max_digit,list_o_combos) {
         txt(cont,"no results") ;
         return;
     }
+    txt(cont,`${list_o_combos.length} results`) ;
+    br(cont);
     for(let combo of list_o_combos) {
         txt(cont,combo.join(", "));
         br(cont);
@@ -75,13 +80,15 @@ function calc_sum() {
     const banned = list("sum_banned");
     const must_use = list("sum_must_include");
     const max_digit = val("sum_max_digit");
-    const results = calc_sum_digits(total, N, must_use, banned, max_digit);
-    render_sum(total,N,banned,must_use,max_digit,results);
+    const allow_repeats = bool("sum_dups");
+    const results = calc_sum_digits(total, N, must_use, banned, max_digit, allow_repeats);
+    render_sum(total,N,banned,must_use,max_digit,allow_repeats,results);
 }
 
 function register_handlers() {
-    get("sum_button").onclick = calc_sum;
-    const focus_els = get_focusable_els();
+    // get("sum_button").onclick = calc_sum;
+    // Handler to move focus to next focusable element on Enter.
+    const focus_els = get("sum_cont").querySelectorAll(["input","button"]);
     document.addEventListener("keydown", (e) => {
         const focused = document.activeElement;
         if(e.key != "Enter") {
@@ -107,6 +114,11 @@ function register_handlers() {
             return;
         }
     });
+    // Refresh results when input changes.
+    for(let el of focus_els) {
+        if(el.tagName == "BUTTON") continue;
+        el.addEventListener("change",calc_sum);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", register_handlers);
