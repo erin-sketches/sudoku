@@ -36,6 +36,10 @@ function clear(id) {
         node.removeChild(node.firstChild);
 }
 
+function get_focusable_els() {
+    return get("sum_cont").querySelectorAll(["input","button"]);
+}
+
 // rendering stuffs below this line //
 
 function render_sum(total,N,banned,must_use,max_digit,list_o_combos) {
@@ -77,6 +81,27 @@ function calc_sum() {
 
 function register_handlers() {
     get("sum_button").onclick = calc_sum;
+    const focus_els = get_focusable_els();
+    document.addEventListener("keypress", (e) => {
+        const focused = document.activeElement;
+        if(e.code != "Enter") {
+            return;
+        }
+        e.preventDefault();
+        if(focused.tagName == "BUTTON") {
+            focused.click();
+            return;
+        }
+        let idx_next = null;
+        for(let [idx,el] of focus_els.entries()) {
+            if(el == focused) {
+                idx_next = idx + 1;
+                break;
+            }
+        }
+        if(idx_next == null) return;
+        focus_els[idx_next]?.focus();
+    });
 }
 
 document.addEventListener("DOMContentLoaded", register_handlers);
