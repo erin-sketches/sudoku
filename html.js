@@ -82,7 +82,7 @@ function calc_sum() {
 function register_handlers() {
     get("sum_button").onclick = calc_sum;
     const focus_els = get_focusable_els();
-    document.addEventListener("keypress", (e) => {
+    document.addEventListener("keydown", (e) => {
         const focused = document.activeElement;
         if(e.code != "Enter") {
             return;
